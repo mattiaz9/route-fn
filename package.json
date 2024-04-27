@@ -1,7 +1,7 @@
 {
   "name": "route-fn",
   "version": "1.0.0",
-  "description": "A small utility function for typesafe urls.",
+  "description": "A simple utility function for typesafe urls.",
   "license": "MIT",
   "type": "module",
   "keywords": [
