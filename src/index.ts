@@ -1,62 +1,10 @@
 import { URLPattern } from "urlpattern-polyfill"
-import type { Prettify, Split } from "./types"
-
-type IsDynamicRoute<Segments extends unknown[]> = Segments extends [
-  infer Head,
-  ...infer Tail
-]
-  ? Head extends `:${string}`
-    ? true
-    : IsDynamicRoute<Tail>
-  : false
-
-type ExtractStaticRouteIds<
-  T extends readonly unknown[],
-  Aggr extends string[] = []
-> = T extends readonly [infer Route, ...infer NextRoutes]
-  ? IsDynamicRoute<Split<Route extends string ? Route : "", "/">> extends true
-    ? ExtractStaticRouteIds<NextRoutes, Aggr>
-    : Route extends string
-    ? ExtractStaticRouteIds<NextRoutes, [...Aggr, Route]>
-    : ExtractStaticRouteIds<NextRoutes, Aggr>
-  : Aggr
-
-type ExtractDynamicRouteIds<
-  T extends readonly unknown[],
-  Aggr extends string[] = []
-> = T extends readonly [infer Route, ...infer NextRoutes]
-  ? IsDynamicRoute<Split<Route extends string ? Route : "", "/">> extends true
-    ? Route extends string
-      ? ExtractDynamicRouteIds<NextRoutes, [...Aggr, Route]>
-      : ExtractDynamicRouteIds<NextRoutes, Aggr>
-    : ExtractDynamicRouteIds<NextRoutes, Aggr>
-  : Aggr
-
-type ExtractParamsFromSegments<
-  T extends unknown[],
-  Aggr extends string[] = []
-> = T extends [infer Head, ...infer Tail]
-  ? Head extends `:${infer P}`
-    ? ExtractParamsFromSegments<Tail, [...Aggr, P]>
-    : ExtractParamsFromSegments<Tail, Aggr>
-  : Aggr
-
-type Params<Id extends string> = ExtractParamsFromSegments<Split<Id, "/">>
-
-type ParamsKeys<Id extends string> = Params<Id>[any]
-
-type RouteIdParams<Id extends string> = Record<
-  ParamsKeys<Id> extends infer Key ? (Key extends string ? Key : never) : never,
-  string | number
->
-
-type SearchParams = {
-  searchParams?: Record<string, string | number>
-}
-
-export type RouteParams<Id extends string> = Prettify<
-  RouteIdParams<Id> & SearchParams
->
+import type {
+  ExtractDynamicRouteIds,
+  ExtractStaticRouteIds,
+  RouteParams,
+  SearchParams,
+} from "./types"
 
 export function createRouteFn<const Routes extends string[]>(routes: Routes) {
   type DynamicRouteId = ExtractDynamicRouteIds<Routes>[number]

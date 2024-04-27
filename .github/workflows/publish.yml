@@ -52,7 +52,7 @@ jobs:
         run: pnpm build
 
       - name: Cache build artifacts
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/dist"
           key: build-artifacts-${{ github.sha }}
@@ -66,7 +66,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Restore build artifacts
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "**/dist"
           key: build-artifacts-${{ github.sha }}
@@ -81,4 +81,4 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm config set "//registry.npmjs.org/:_authToken" "${NPM_TOKEN}"
-          npm -r publish ./dist --access=public --no-git-checks
+          npm -r publish . --access=public --no-git-checks
