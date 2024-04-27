@@ -1,0 +1,33 @@
+{
+  "name": "route-fn",
+  "version": "1.0.0",
+  "description": "A small utility function for typesafe urls.",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "typesafe",
+    "typescript",
+    "routes",
+    "urls"
+  ],
+  "author": "Mattia Dalzocchio <mattiadalzocchio@me.com>",
+  "module": "./index.js",
+  "main": "./index.cjs",
+  "types": "./index.d.ts",
+  "scripts": {
+    "dev": "rm -rf dist && tsup src/index.ts --format esm --dts-resolve --clean --watch --sourcemap --dts",
+    "build": "tsup src/index.ts --format esm,cjs --dts-resolve --minify --clean --sourcemap --dts",
+    "test": "vitest run",
+    "lint": "eslint --ext .ts,.tsx src"
+  },
+  "dependencies": {
+    "urlpattern-polyfill": "10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.7",
+    "tsup": "8.0.2",
+    "typescript": "5.4.5",
+    "vitest": "1.5.2"
+  },
+  "packageManager": "pnpm@9.0.6"
+}
