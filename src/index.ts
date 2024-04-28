@@ -1,5 +1,6 @@
 import { URLPattern } from "urlpattern-polyfill"
 import type {
+  DynamicParamsDictionary,
   ExtractDynamicRouteIds,
   ExtractStaticRouteIds,
   RouteParams,
@@ -39,8 +40,7 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     return url
   }
 
-  // TODO: infer return object with autofilled params
-  fn.params = function (url: string): object {
+  fn.params = function (url: string): DynamicParamsDictionary<Routes> {
     const urlWithOrigin = new URL(url, "http://localhost").href
     const input = urlWithOrigin.split("?")[0]
 
@@ -69,7 +69,7 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     for (const pattern of patterns) {
       const patternResult = pattern.exec(input)
       if (patternResult !== null) {
-        return patternResult.pathname.groups
+        return patternResult.pathname.groups as DynamicParamsDictionary<Routes>
       }
     }
 

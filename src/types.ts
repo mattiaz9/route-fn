@@ -66,3 +66,16 @@ export type SearchParams = {
 export type RouteParams<Id extends string> = Prettify<
   RouteIdParams<Id> & SearchParams
 >
+
+export type AllDynamicParams<T extends readonly string[]> =
+  T[number] extends `${infer Route}`
+    ? Split<Route, "/">[number] extends infer U
+      ? U extends `:${infer Param}`
+        ? Param
+        : never
+      : never
+    : never
+
+export type DynamicParamsDictionary<T extends readonly string[]> = Prettify<{
+  [K in AllDynamicParams<T>]?: string
+}>
