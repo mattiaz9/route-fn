@@ -22,11 +22,25 @@ describe("route-fn", () => {
   })
 
   it("should return the correct route with search params", async () => {
-    const route = createRouteFn(["/account", "/user/:id"])
+    const route = createRouteFn(["/user/:id"])
 
+    expect(route("/user/:id", { id: 1, searchParams: { page: 0 } })).toBe(
+      "/user/1?page=0"
+    )
     expect(route("/user/:id", { id: 1, searchParams: { page: 2 } })).toBe(
       "/user/1?page=2"
     )
+  })
+
+  it("should strip null or undefined search params", async () => {
+    const route = createRouteFn(["/user/:id"])
+
+    expect(route("/user/:id", { id: 1, searchParams: { page: null } })).toBe(
+      "/user/1"
+    )
+    expect(
+      route("/user/:id", { id: 1, searchParams: { page: undefined } })
+    ).toBe("/user/1")
   })
 
   it("should show type error when a param is missing", async () => {

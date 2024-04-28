@@ -60,7 +60,7 @@ export type RouteIdParams<Id extends string> = Record<
 >
 
 export type SearchParams = {
-  searchParams?: Record<string, string | number>
+  searchParams?: Record<string, string | number | null | undefined>
 }
 
 export type RouteParams<Id extends string> = Prettify<
