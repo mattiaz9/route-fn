@@ -80,3 +80,18 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next()
 }
 ```
+
+## Route testing
+
+```ts
+const route = createRouteFn([
+  "/",
+  "/:user",
+  "/:user/:repo",
+  "/:user/:repo/:branch",
+])
+
+route.test("/mattiaz9/route-fn/main", "/:user/:repo/:branch") // true
+route.test("/mattiaz9/route-fn/main", ["/:user/:repo", "/:user/:repo/:branch"]) // true
+route.test("/mattiaz9/route-fn/main", "/:user/:repo") // false
+```

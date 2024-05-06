@@ -7,6 +7,8 @@ import type {
   SearchParams,
 } from "./types"
 
+const fakeOrigin = "http://localhost"
+
 export function createRouteFn<const Routes extends string[]>(routes: Routes) {
   type DynamicRouteId = ExtractDynamicRouteIds<Routes>[number]
   type StaticRouteId = ExtractStaticRouteIds<Routes>[number]
@@ -45,7 +47,7 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
   }
 
   fn.params = function (url: string): DynamicParamsDictionary<Routes> {
-    const urlWithOrigin = new URL(url, "http://localhost").href
+    const urlWithOrigin = new URL(url, fakeOrigin).href
     const input = urlWithOrigin.split("?")[0]
 
     // sort routes to avoid dynamic params conflicts
@@ -78,6 +80,27 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     }
 
     return {}
+  }
+
+  fn.test = function (
+    url: string,
+    routeIds:
+      | StaticRouteId
+      | DynamicRouteId
+      | (StaticRouteId | DynamicRouteId)[]
+  ): boolean {
+    const routes = typeof routeIds === "string" ? [routeIds] : routeIds
+    for (const route of routes) {
+      const urlWithOrigin = new URL(url, fakeOrigin).href
+      const input = urlWithOrigin.split("?")[0]
+
+      const pattern = new URLPattern({ pathname: route })
+
+      if (pattern.test(input)) {
+        return true
+      }
+    }
+    return false
   }
 
   return fn
