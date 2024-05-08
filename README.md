@@ -95,3 +95,21 @@ route.test("/mattiaz9/route-fn/main", "/:user/:repo/:branch") // true
 route.test("/mattiaz9/route-fn/main", ["/:user/:repo", "/:user/:repo/:branch"]) // true
 route.test("/mattiaz9/route-fn/main", "/:user/:repo") // false
 ```
+
+## Troubleshooting
+
+### FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+
+For some reason setting `incremental` to `true` in `tsconfig.json` causes the `tsc` process to run out of memory. To fix this issue set `incremental` to `false`.
+
+```json
+// tsconfig.json
+
+{
+  "compilerOptions": {
+    // ...
+    "incremental": false
+    // ...
+  }
+}
+```
