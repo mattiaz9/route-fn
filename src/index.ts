@@ -103,5 +103,9 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     return false
   }
 
+  fn.list = function (): Routes {
+    return routes
+  }
+
   return fn
 }
