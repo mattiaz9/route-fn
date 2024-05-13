@@ -1,8 +1,10 @@
 import { URLPattern } from "urlpattern-polyfill"
 import type {
+  AllDynamicParams,
   DynamicParamsDictionary,
   ExtractDynamicRouteIds,
   ExtractStaticRouteIds,
+  RouteIdParams,
   RouteParams,
   SearchParams,
 } from "./types"
@@ -109,3 +111,5 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
 
   return fn
 }
+
+export { DynamicParamsDictionary, AllDynamicParams, RouteParams, RouteIdParams }
