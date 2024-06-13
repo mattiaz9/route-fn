@@ -24,23 +24,15 @@ describe("route-fn", () => {
   it("should return the correct route with search params", () => {
     const route = createRouteFn(["/user/:id"])
 
-    expect(route("/user/:id", { id: 1, searchParams: { page: 0 } })).toBe(
-      "/user/1?page=0"
-    )
-    expect(route("/user/:id", { id: 1, searchParams: { page: 2 } })).toBe(
-      "/user/1?page=2"
-    )
+    expect(route("/user/:id", { id: 1, searchParams: { page: 0 } })).toBe("/user/1?page=0")
+    expect(route("/user/:id", { id: 1, searchParams: { page: 2 } })).toBe("/user/1?page=2")
   })
 
   it("should strip null or undefined search params", () => {
     const route = createRouteFn(["/user/:id"])
 
-    expect(route("/user/:id", { id: 1, searchParams: { page: null } })).toBe(
-      "/user/1"
-    )
-    expect(
-      route("/user/:id", { id: 1, searchParams: { page: undefined } })
-    ).toBe("/user/1")
+    expect(route("/user/:id", { id: 1, searchParams: { page: null } })).toBe("/user/1")
+    expect(route("/user/:id", { id: 1, searchParams: { page: undefined } })).toBe("/user/1")
   })
 
   it("should show type error when a param is missing", () => {
@@ -74,13 +66,11 @@ describe("route-fn.params", () => {
   })
 })
 
-describe("route-fn.match", () => {
+describe("route-fn.test", () => {
   it("should match the same url", () => {
     const route = createRouteFn(["/user/:id/settings/:page"])
 
-    expect(
-      route.test("/user/1/settings/2", "/user/:id/settings/:page")
-    ).toEqual(true)
+    expect(route.test("/user/1/settings/2", "/user/:id/settings/:page")).toEqual(true)
   })
 
   it("should match one of multiple test routes", () => {
@@ -96,15 +86,18 @@ describe("route-fn.match", () => {
   })
 
   it("should not match different route", () => {
-    const route = createRouteFn(["/user/:id/settings/:page"])
+    const route = createRouteFn([
+      "/:org",
+      "/:org/settings",
+      "/:org/settings/billing",
+      "/:org/:project",
+      "/:org/:project/posts",
+      "/:org/:project/settings",
+    ])
 
-    expect(route.test("/user", "/user/:id/settings/:page")).toEqual(false)
-    expect(route.test("/user/1", "/user/:id/settings/:page")).toEqual(false)
-    expect(route.test("/user/1/settings", "/user/:id/settings/:page")).toEqual(
-      false
-    )
-    expect(
-      route.test("/user/1/settings/2/posts", "/user/:id/settings/:page")
-    ).toEqual(false)
+    expect(route.test("/apple", "/:org/:project")).toEqual(false)
+    expect(route.test("/apple/settings", "/:org/:project")).toEqual(false)
+    expect(route.test("/apple/settings/billing", "/:org/:project/posts")).toEqual(false)
+    expect(route.test("/apple/settings/billing", "/:org/:project/settings")).toEqual(false)
   })
 })

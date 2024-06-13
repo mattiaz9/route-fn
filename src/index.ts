@@ -15,14 +15,8 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
   type DynamicRouteId = ExtractDynamicRouteIds<Routes>[number]
   type StaticRouteId = ExtractStaticRouteIds<Routes>[number]
 
-  function fn<Id extends DynamicRouteId>(
-    id: Id,
-    params: RouteParams<Id>
-  ): string
-  function fn<Id extends StaticRouteId>(
-    id: Id,
-    params?: RouteParams<Id>
-  ): string
+  function fn<Id extends DynamicRouteId>(id: Id, params: RouteParams<Id>): string
+  function fn<Id extends StaticRouteId>(id: Id, params?: RouteParams<Id>): string
   function fn<Id extends DynamicRouteId | StaticRouteId>(
     id: Id,
     params?: RouteParams<Id> | SearchParams
@@ -70,9 +64,7 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
       return 0
     })
 
-    const patterns = sortedRoutes.map(
-      (route) => new URLPattern({ pathname: route })
-    )
+    const patterns = sortedRoutes.map((route) => new URLPattern({ pathname: route }))
 
     for (const pattern of patterns) {
       const patternResult = pattern.exec(input)
@@ -86,13 +78,11 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
 
   fn.test = function (
     url: string,
-    routeIds:
-      | StaticRouteId
-      | DynamicRouteId
-      | (StaticRouteId | DynamicRouteId)[]
+    routeIds: StaticRouteId | DynamicRouteId | (StaticRouteId | DynamicRouteId)[]
   ): boolean {
-    const routes = typeof routeIds === "string" ? [routeIds] : routeIds
-    for (const route of routes) {
+    const matchingRoutes = typeof routeIds === "string" ? [routeIds] : routeIds
+
+    const matchedRoutes = routes.filter((route) => {
       const urlWithOrigin = new URL(url, fakeOrigin).href
       const input = urlWithOrigin.split("?")[0]
 
@@ -101,8 +91,17 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
       if (pattern.test(input)) {
         return true
       }
-    }
-    return false
+
+      return false
+    })
+
+    // make sure some dynamic params are not conflicting
+    return (
+      matchedRoutes.length > 0 &&
+      matchedRoutes.every((route) =>
+        matchingRoutes.includes(route as StaticRouteId | DynamicRouteId)
+      )
+    )
   }
 
   fn.list = function (): Routes {
