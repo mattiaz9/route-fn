@@ -75,14 +75,23 @@ describe("route-fn.test", () => {
 
   it("should match one of multiple test routes", () => {
     const route = createRouteFn([
-      "/user/:id/settings/:page",
-      "/user/:id/settings",
-      "/user/:id",
-      "/user",
+      "/:org/:project/settings",
+      "/:org/:project/posts",
+      "/:org/:project",
+      "/:org/settings/billing",
+      "/:org/settings",
+      "/:org",
     ])
 
-    expect(route.test("/user/1", ["/user", "/user/:id"])).toEqual(true)
-    expect(route.test("/user", ["/user", "/user/:id"])).toEqual(true)
+    expect(route.test("/apple", ["/:org", "/:org/settings", "/:org/settings/billing"])).toEqual(
+      true
+    )
+    expect(
+      route.test("/apple/settings", ["/:org", "/:org/settings", "/:org/settings/billing"])
+    ).toEqual(true)
+    expect(
+      route.test("/apple/settings/billing", ["/:org", "/:org/settings", "/:org/settings/billing"])
+    ).toEqual(true)
   })
 
   it("should not match different route", () => {

@@ -15,6 +15,24 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
   type DynamicRouteId = ExtractDynamicRouteIds<Routes>[number]
   type StaticRouteId = ExtractStaticRouteIds<Routes>[number]
 
+  // sort routes to avoid dynamic params conflicts
+  const sortedRoutes = routes.sort((a, b) => {
+    const aSegments = a.split("/").filter(Boolean)
+    const bSegments = b.split("/").filter(Boolean)
+
+    for (let i = 0; i < Math.min(aSegments.length, bSegments.length); i++) {
+      if (aSegments[i].includes(":") && !bSegments[i].includes(":")) {
+        return 1
+      }
+
+      if (!aSegments[i].includes(":") && bSegments[i].includes(":")) {
+        return -1
+      }
+    }
+
+    return 0
+  })
+
   function fn<Id extends DynamicRouteId>(id: Id, params: RouteParams<Id>): string
   function fn<Id extends StaticRouteId>(id: Id, params?: RouteParams<Id>): string
   function fn<Id extends DynamicRouteId | StaticRouteId>(
@@ -46,24 +64,6 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     const urlWithOrigin = new URL(url, fakeOrigin).href
     const input = urlWithOrigin.split("?")[0]
 
-    // sort routes to avoid dynamic params conflicts
-    const sortedRoutes = routes.sort((a, b) => {
-      const aSegments = a.split("/").filter(Boolean)
-      const bSegments = b.split("/").filter(Boolean)
-
-      for (let i = 0; i < Math.min(aSegments.length, bSegments.length); i++) {
-        if (aSegments[i].includes(":") && !bSegments[i].includes(":")) {
-          return 1
-        }
-
-        if (!aSegments[i].includes(":") && bSegments[i].includes(":")) {
-          return -1
-        }
-      }
-
-      return 0
-    })
-
     const patterns = sortedRoutes.map((route) => new URLPattern({ pathname: route }))
 
     for (const pattern of patterns) {
@@ -81,8 +81,7 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     routeIds: StaticRouteId | DynamicRouteId | (StaticRouteId | DynamicRouteId)[]
   ): boolean {
     const matchingRoutes = typeof routeIds === "string" ? [routeIds] : routeIds
-
-    const matchedRoutes = routes.filter((route) => {
+    const bestMatch = sortedRoutes.find((route) => {
       const urlWithOrigin = new URL(url, fakeOrigin).href
       const input = urlWithOrigin.split("?")[0]
 
@@ -95,13 +94,7 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
       return false
     })
 
-    // make sure some dynamic params are not conflicting
-    return (
-      matchedRoutes.length > 0 &&
-      matchedRoutes.every((route) =>
-        matchingRoutes.includes(route as StaticRouteId | DynamicRouteId)
-      )
-    )
+    return bestMatch ? matchingRoutes.includes(bestMatch as StaticRouteId | DynamicRouteId) : false
   }
 
   fn.list = function (): Routes {
