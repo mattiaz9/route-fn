@@ -23,7 +23,7 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     id: Id,
     params?: RouteParams<Id>
   ): string
-  function fn<Id extends StaticRouteId | DynamicRouteId>(
+  function fn<Id extends DynamicRouteId | StaticRouteId>(
     id: Id,
     params?: RouteParams<Id> | SearchParams
   ): string {
