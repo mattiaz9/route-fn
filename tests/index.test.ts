@@ -64,6 +64,15 @@ describe("route-fn.params", () => {
       project: "route-fn",
     })
   })
+
+  it("should handle special characters", () => {
+    const route = createRouteFn(["/:org/:id/+"])
+
+    expect(route.params("/apple/iphone/+")).toEqual({
+      org: "apple",
+      id: "iphone",
+    })
+  })
 })
 
 describe("route-fn.test", () => {
@@ -108,5 +117,12 @@ describe("route-fn.test", () => {
     expect(route.test("/apple/settings", "/:org/:project")).toEqual(false)
     expect(route.test("/apple/settings/billing", "/:org/:project/posts")).toEqual(false)
     expect(route.test("/apple/settings/billing", "/:org/:project/settings")).toEqual(false)
+  })
+
+  it("should handle special characters", () => {
+    const route = createRouteFn(["/:org/+"])
+
+    expect(route.test("/apple/new", "/:org/+")).toEqual(false)
+    expect(route.test("/apple/+", "/:org/+")).toEqual(true)
   })
 })

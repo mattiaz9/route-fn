@@ -8,6 +8,7 @@ import type {
   RouteParams,
   SearchParams,
 } from "./types"
+import { safeUrl } from "./safe-url"
 
 const fakeOrigin = "http://localhost"
 
@@ -62,9 +63,9 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
 
   fn.params = function (url: string): DynamicParamsDictionary<Routes> {
     const urlWithOrigin = new URL(url, fakeOrigin).href
-    const input = urlWithOrigin.split("?")[0]
+    const input = safeUrl(urlWithOrigin.split("?")[0])
 
-    const patterns = sortedRoutes.map((route) => new URLPattern({ pathname: route }))
+    const patterns = sortedRoutes.map((route) => new URLPattern({ pathname: safeUrl(route) }))
 
     for (const pattern of patterns) {
       const patternResult = pattern.exec(input)
@@ -83,9 +84,9 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     const matchingRoutes = typeof routeIds === "string" ? [routeIds] : routeIds
     const bestMatch = sortedRoutes.find((route) => {
       const urlWithOrigin = new URL(url, fakeOrigin).href
-      const input = urlWithOrigin.split("?")[0]
+      const input = safeUrl(urlWithOrigin.split("?")[0])
 
-      const pattern = new URLPattern({ pathname: route })
+      const pattern = new URLPattern({ pathname: safeUrl(route) })
 
       if (pattern.test(input)) {
         return true
