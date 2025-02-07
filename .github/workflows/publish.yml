@@ -16,12 +16,12 @@ jobs:
       - name: Setup node & npm
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9.1.0
+          version: 10
 
       - run: pnpm install
 
@@ -54,7 +54,7 @@ jobs:
       - name: Setup node & npm
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Publish to NPM
         env:
