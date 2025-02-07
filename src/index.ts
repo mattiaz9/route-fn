@@ -6,7 +6,7 @@ import type {
   ExtractStaticRouteIds,
   RouteIdParams,
   RouteParams,
-  SearchParams,
+  RouteOptions,
 } from "./types"
 import { safeUrl } from "./safe-url"
 
@@ -38,7 +38,7 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
   function fn<Id extends StaticRouteId>(id: Id, params?: RouteParams<Id>): string
   function fn<Id extends DynamicRouteId | StaticRouteId>(
     id: Id,
-    params?: RouteParams<Id> | SearchParams
+    params?: RouteParams<Id> | RouteOptions
   ): string {
     let url: string = id
 
@@ -56,6 +56,14 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
         const param = (params as Record<string, string>)[key]!
         url = url.replace(`:${key}`, param)
       }
+    }
+
+    if (params?.prefix) {
+      url = `/${params.prefix.replace(/(^\/)|(\/$)/g, "")}${url}`
+    }
+
+    if (params?.origin) {
+      url = new URL(url, params.origin).href
     }
 
     return url

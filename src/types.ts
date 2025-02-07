@@ -1,12 +1,16 @@
-export type Prettify<T> = {
+type Prettify<T> = {
   [K in keyof T]: T[K]
 } & {}
 
-export type Split<S extends string, D extends string> = string extends S
+type Split<S extends string, D extends string> = string extends S
   ? string[]
   : S extends `${infer T}${D}${infer U}`
   ? [T, ...Split<U, D>]
   : [S]
+
+export type RouteInitOptions = {}
+
+export type RouteInit = string | [string, RouteInitOptions]
 
 export type IsDynamicRoute<Segments extends unknown[]> = Segments extends [
   infer Head,
@@ -39,18 +43,16 @@ export type ExtractDynamicRouteIds<
     : ExtractDynamicRouteIds<NextRoutes, Aggr>
   : Aggr
 
-export type ExtractParamsFromSegments<
-  T extends unknown[],
-  Aggr extends string[] = []
-> = T extends [infer Head, ...infer Tail]
+export type ExtractParamsFromSegments<T extends unknown[], Aggr extends string[] = []> = T extends [
+  infer Head,
+  ...infer Tail
+]
   ? Head extends `:${infer P}`
     ? ExtractParamsFromSegments<Tail, [...Aggr, P]>
     : ExtractParamsFromSegments<Tail, Aggr>
   : Aggr
 
-export type Params<Id extends string> = ExtractParamsFromSegments<
-  Split<Id, "/">
->
+export type Params<Id extends string> = ExtractParamsFromSegments<Split<Id, "/">>
 
 export type ParamsKeys<Id extends string> = Params<Id>[any]
 
@@ -59,22 +61,21 @@ export type RouteIdParams<Id extends string> = Record<
   string | number
 >
 
-export type SearchParams = {
+export type RouteOptions = {
   searchParams?: Record<string, string | number | null | undefined>
+  origin?: string
+  prefix?: string
 }
 
-export type RouteParams<Id extends string> = Prettify<
-  RouteIdParams<Id> & SearchParams
->
+export type RouteParams<Id extends string> = Prettify<RouteIdParams<Id> & RouteOptions>
 
-export type AllDynamicParams<T extends readonly string[]> =
-  T[number] extends `${infer Route}`
-    ? Split<Route, "/">[number] extends infer U
-      ? U extends `:${infer Param}`
-        ? Param
-        : never
+export type AllDynamicParams<T extends readonly string[]> = T[number] extends `${infer Route}`
+  ? Split<Route, "/">[number] extends infer U
+    ? U extends `:${infer Param}`
+      ? Param
       : never
     : never
+  : never
 
 export type DynamicParamsDictionary<T extends readonly string[]> = Prettify<{
   [K in AllDynamicParams<T>]?: string

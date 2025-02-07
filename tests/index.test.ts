@@ -41,6 +41,25 @@ describe("route-fn", () => {
     // @ts-expect-error
     route("/user/:id/settings/:page", { page: 2 })
   })
+
+  it("should add the url origin and handle slashes", () => {
+    const route = createRouteFn(["/user/:id"])
+
+    expect(route("/user/:id", { id: 1, origin: "http://example.com" })).toBe(
+      "http://example.com/user/1"
+    )
+    expect(route("/user/:id", { id: 1, origin: "http://example.com/" })).toBe(
+      "http://example.com/user/1"
+    )
+  })
+
+  it("should add the url prefix and handle slashes", () => {
+    const route = createRouteFn(["/user/:id"])
+
+    expect(route("/user/:id", { id: 1, prefix: "en" })).toBe("/en/user/1")
+    expect(route("/user/:id", { id: 1, prefix: "/en" })).toBe("/en/user/1")
+    expect(route("/user/:id", { id: 1, prefix: "/en/" })).toBe("/en/user/1")
+  })
 })
 
 describe("route-fn.params", () => {
