@@ -81,7 +81,7 @@ export async function middleware(req: NextRequest) {
 }
 ```
 
-## Route testing
+## Route matchin
 
 ```ts
 const route = createRouteFn([
@@ -91,16 +91,16 @@ const route = createRouteFn([
   "/:user/:repo/:branch",
 ])
 
-route.test("/mattiaz9/route-fn/main", "/:user/:repo/:branch") // true
-route.test("/mattiaz9/route-fn/main", ["/:user/:repo", "/:user/:repo/:branch"]) // true
-route.test("/mattiaz9/route-fn/main", "/:user/:repo") // false
+route.matchUrl("/mattiaz9/route-fn/main", "/:user/:repo/:branch") // true
+route.matchUrl("/mattiaz9/route-fn/main", ["/:user/:repo", "/:user/:repo/:branch"]) // true
+route.matchUrl("/mattiaz9/route-fn/main", "/:user/:repo") // false
 ```
 
 ## Troubleshooting
 
 ### FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
 
-For some reason setting `incremental` to `true` in `tsconfig.json` causes the `tsc` process to run out of memory. To fix this issue set `incremental` to `false`.
+For some reason setting `incremental` to `true` in `tsconfig.json` causes the `tsc` process to run out of memory. To fix this issue set `incremental` to `false` .
 
 ```json
 // tsconfig.json

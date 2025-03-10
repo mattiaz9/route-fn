@@ -16,6 +16,9 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
   type DynamicRouteId = ExtractDynamicRouteIds<Routes>[number]
   type StaticRouteId = ExtractStaticRouteIds<Routes>[number]
 
+  type StaticRouteCatchAllId = `${StaticRouteId}/*`
+  type DynamicRouteCatchAllId = `${DynamicRouteId}/*`
+
   // sort routes to avoid dynamic params conflicts
   const sortedRoutes = routes.sort((a, b) => {
     const aSegments = a.split("/").filter(Boolean)
@@ -85,19 +88,38 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
     return {}
   }
 
-  fn.test = function (
+  fn.matchUrl = function (
     url: string,
-    routeIds: StaticRouteId | DynamicRouteId | (StaticRouteId | DynamicRouteId)[]
+    routeIds:
+      | StaticRouteId
+      | DynamicRouteId
+      | StaticRouteCatchAllId
+      | DynamicRouteCatchAllId
+      | (StaticRouteId | DynamicRouteId | StaticRouteCatchAllId | DynamicRouteCatchAllId)[]
   ): boolean {
     const matchingRoutes = typeof routeIds === "string" ? [routeIds] : routeIds
-    const bestMatch = sortedRoutes.find((route) => {
+    const otherRoutes = sortedRoutes.filter((route) =>
+      matchingRoutes.every(
+        (matchRoute) =>
+          matchRoute !== route && (matchRoute as string).replace(/\/\*$/, "") !== route
+      )
+    )
+    const isMatch = (route: string) => {
       const urlWithOrigin = new URL(url, fakeOrigin).href
-      const input = safeUrl(urlWithOrigin.split("?")[0])
+      const input = safeUrl(urlWithOrigin.split("?")[0]).replace(/\/$/, "")
+      return new URLPattern({ pathname: safeUrl(route).replace(/\/\*$/, "*") }).test(input)
+    }
 
-      const pattern = new URLPattern({ pathname: safeUrl(route) })
-
-      if (pattern.test(input)) {
-        return true
+    const bestMatch = matchingRoutes.find((route) => {
+      if (isMatch(route)) {
+        const strictMatchingRoute = (route as string).replace(/\/\*$/, "")
+        // check if it doesn't match any other route
+        return otherRoutes.every((r) => {
+          if (isMatch(r) && sortedRoutes.indexOf(r) < sortedRoutes.indexOf(strictMatchingRoute)) {
+            return false
+          }
+          return true
+        })
       }
 
       return false

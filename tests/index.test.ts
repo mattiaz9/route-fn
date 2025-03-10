@@ -94,11 +94,19 @@ describe("route-fn.params", () => {
   })
 })
 
-describe("route-fn.test", () => {
+describe("route-fn.matchUrl", () => {
   it("should match the same url", () => {
     const route = createRouteFn(["/user/:id/settings/:page"])
 
-    expect(route.test("/user/1/settings/2", "/user/:id/settings/:page")).toEqual(true)
+    expect(route.matchUrl("/user/1/settings/2", "/user/:id/settings/:page")).toEqual(true)
+  })
+
+  it("should match catch all urls", () => {
+    const route = createRouteFn(["/user/:id/settings/:page"])
+
+    expect(route.matchUrl("/user/1/settings/2", "/user/:id/settings/:page/*")).toEqual(true)
+    expect(route.matchUrl("/user/1/settings/2/extra", "/user/:id/settings/:page/*")).toEqual(true)
+    expect(route.matchUrl("/user/1/settings/2/extra/3", "/user/:id/settings/:page/*")).toEqual(true)
   })
 
   it("should match one of multiple test routes", () => {
@@ -111,19 +119,25 @@ describe("route-fn.test", () => {
       "/:org",
     ])
 
-    expect(route.test("/apple", ["/:org", "/:org/settings", "/:org/settings/billing"])).toEqual(
+    expect(route.matchUrl("/apple", ["/:org", "/:org/settings", "/:org/settings/billing"])).toEqual(
       true
     )
     expect(
-      route.test("/apple/settings", ["/:org", "/:org/settings", "/:org/settings/billing"])
+      route.matchUrl("/apple/settings", ["/:org", "/:org/settings", "/:org/settings/billing"])
     ).toEqual(true)
     expect(
-      route.test("/apple/settings/billing", ["/:org", "/:org/settings", "/:org/settings/billing"])
+      route.matchUrl("/apple/settings/billing", [
+        "/:org",
+        "/:org/settings",
+        "/:org/settings/billing",
+      ])
     ).toEqual(true)
+    expect(route.matchUrl("/apple/settings", ["/:org/settings/*"])).toEqual(true)
   })
 
   it("should not match different route", () => {
     const route = createRouteFn([
+      "/pricing",
       "/:org",
       "/:org/settings",
       "/:org/settings/billing",
@@ -132,16 +146,22 @@ describe("route-fn.test", () => {
       "/:org/:project/settings",
     ])
 
-    expect(route.test("/apple", "/:org/:project")).toEqual(false)
-    expect(route.test("/apple/settings", "/:org/:project")).toEqual(false)
-    expect(route.test("/apple/settings/billing", "/:org/:project/posts")).toEqual(false)
-    expect(route.test("/apple/settings/billing", "/:org/:project/settings")).toEqual(false)
+    expect(route.matchUrl("/pricing", "/:org")).toEqual(false)
+    expect(route.matchUrl("/apple", "/:org/:project")).toEqual(false)
+    expect(route.matchUrl("/apple/settings", "/:org/:project")).toEqual(false)
+    expect(route.matchUrl("/apple/settings/billing", "/:org/:project/posts")).toEqual(false)
+    expect(route.matchUrl("/apple/settings/billing", "/:org/:project/settings")).toEqual(false)
+    expect(route.matchUrl("/pricing", "/:org/*")).toEqual(false)
+    expect(route.matchUrl("/apple/settings", "/:org/:project/*")).toEqual(false)
+    expect(route.matchUrl("/apple/settings/billing", "/:org/:project/*")).toEqual(false)
   })
 
   it("should handle special characters", () => {
     const route = createRouteFn(["/:org/+"])
 
-    expect(route.test("/apple/new", "/:org/+")).toEqual(false)
-    expect(route.test("/apple/+", "/:org/+")).toEqual(true)
+    expect(route.matchUrl("/apple/new", "/:org/+")).toEqual(false)
+    expect(route.matchUrl("/apple/+", "/:org/+")).toEqual(true)
+    expect(route.matchUrl("/apple/+", "/:org/+/*")).toEqual(true)
+    expect(route.matchUrl("/apple/+/extra", "/:org/+/*")).toEqual(true)
   })
 })
