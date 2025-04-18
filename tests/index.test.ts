@@ -28,6 +28,18 @@ describe("route-fn", () => {
     expect(route("/user/:id", { id: 1, searchParams: { page: 2 } })).toBe("/user/1?page=2")
   })
 
+  it("should return the correct route with URLSearchParams object", () => {
+    const route = createRouteFn(["/user/:id"])
+
+    let searchParams = new URLSearchParams({ page: "0" })
+    expect(route("/user/:id", { id: 1, searchParams })).toBe("/user/1?page=0")
+
+    searchParams = new URLSearchParams({ page: "2" })
+    searchParams.append("list", "1")
+    searchParams.append("list", "2")
+    expect(route("/user/:id", { id: 1, searchParams })).toBe("/user/1?page=2&list=1&list=2")
+  })
+
   it("should strip null or undefined search params", () => {
     const route = createRouteFn(["/user/:id"])
 

@@ -62,7 +62,7 @@ export type RouteIdParams<Id extends string> = Record<
 >
 
 export type RouteOptions = {
-  searchParams?: Record<string, string | number | null | undefined>
+  searchParams?: Record<string, string | number | null | undefined> | URLSearchParams
   origin?: string
   prefix?: string
 }

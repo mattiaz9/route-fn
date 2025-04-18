@@ -47,13 +47,16 @@ export function createRouteFn<const Routes extends string[]>(routes: Routes) {
 
     for (const key in params) {
       if (key === "searchParams") {
-        const searchParams = new URLSearchParams(
-          Object.fromEntries(
-            Object.entries(params.searchParams ?? {})
-              .filter(([, value]) => value !== null && value !== undefined)
-              .map(([key, value]) => [key, value!.toString()])
-          )
-        )
+        const searchParams =
+          params.searchParams instanceof URLSearchParams
+            ? params.searchParams
+            : new URLSearchParams(
+                Object.fromEntries(
+                  Object.entries(params.searchParams ?? {})
+                    .filter(([, value]) => value !== null && value !== undefined)
+                    .map(([key, value]) => [key, value!.toString()])
+                )
+              )
         url += searchParams.size ? `?${searchParams.toString()}` : ""
       } else {
         const param = (params as Record<string, string>)[key]!
